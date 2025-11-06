@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User, ArrowLeft } from 'lucide-react';
 
@@ -7,7 +7,7 @@ interface LoginProps {
 }
 
 export function Login({ onNavigate }: LoginProps) {
-  const { login, register, loginAsGuest } = useAuth();
+  const { login, register } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -32,11 +32,6 @@ export function Login({ onNavigate }: LoginProps) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGuestLogin = () => {
-    loginAsGuest();
-    onNavigate('dashboard');
   };
 
   return (
@@ -77,7 +72,7 @@ export function Login({ onNavigate }: LoginProps) {
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                     placeholder="Juan Pérez"
-                    required={!isLogin}
+                    required
                   />
                 </div>
               </div>
@@ -125,24 +120,6 @@ export function Login({ onNavigate }: LoginProps) {
               {loading ? 'Procesando...' : isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
             </button>
           </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/20"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-transparent text-gray-300">o</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleGuestLogin}
-              className="mt-4 w-full py-3 rounded-lg bg-white/5 border border-white/20 text-white font-medium hover:bg-white/10 transition-all"
-            >
-              Continuar como invitado
-            </button>
-          </div>
 
           <p className="mt-6 text-center text-gray-300">
             {isLogin ? '¿No tenés cuenta?' : '¿Ya tenés cuenta?'}{' '}

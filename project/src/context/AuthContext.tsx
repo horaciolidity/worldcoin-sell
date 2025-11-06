@@ -11,7 +11,6 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
-  loginAsGuest: () => void;
   logout: () => void;
 }
 
@@ -21,7 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   const login = async (email: string, password: string) => {
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(resolve, 800)); // simulación
     setUser({
       email,
       name: email.split('@')[0],
@@ -30,19 +29,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (email: string, password: string, name: string) => {
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(resolve, 800)); // simulación
     setUser({
       email,
       name,
       balance: 0
-    });
-  };
-
-  const loginAsGuest = () => {
-    setUser({
-      email: 'guest@worldcoin.com',
-      name: 'Guest User',
-      balance: 10.0
     });
   };
 
@@ -56,7 +47,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: !!user,
       login,
       register,
-      loginAsGuest,
       logout
     }}>
       {children}
@@ -66,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

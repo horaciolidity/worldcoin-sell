@@ -15,7 +15,7 @@ export function Exchange({ onNavigate }: ExchangeProps) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const exchangeRate = currency === 'USD' ? 2.45 : 857.50;
-  const walletAddress = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb';
+  const walletAddress = '0xbaeade80a2a1064e4f8f372cd2ada9a00dab4bbe';
 
   const convertedAmount = amount ? (Number(amount) * exchangeRate).toFixed(2) : '0.00';
 
@@ -23,6 +23,31 @@ export function Exchange({ onNavigate }: ExchangeProps) {
     navigator.clipboard.writeText(walletAddress);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  // ✅ Guardar transacción real en localStorage usando MÉTODO A
+  const saveTransaction = () => {
+    const paymentMethods = JSON.parse(localStorage.getItem("paymentMethods") || "{}");
+
+    const selectedMethod =
+      paymentMethods.alias ||
+      paymentMethods.cbu ||
+      paymentMethods.wallet ||
+      "Sin método configurado";
+
+    const newTx = {
+      id: crypto.randomUUID(),
+      amount: Number(amount),
+      currency: currency,
+      convertedAmount,
+      method: selectedMethod,
+      status: "pending",
+      date: new Date().toLocaleString(),
+    };
+
+    const prev = JSON.parse(localStorage.getItem("transactions") || "[]");
+    prev.unshift(newTx);
+    localStorage.setItem("transactions", JSON.stringify(prev));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,8 +58,9 @@ export function Exchange({ onNavigate }: ExchangeProps) {
   };
 
   const handleConfirm = () => {
+    saveTransaction();  // ✅ Guarda la venta real
     setShowConfirmModal(false);
-    onNavigate('status');
+    onNavigate('status'); // ✅ Va al historial
   };
 
   return (
@@ -106,7 +132,7 @@ export function Exchange({ onNavigate }: ExchangeProps) {
               <span className="text-gray-300">Recibirás aproximadamente</span>
               <div className="text-right">
                 <p className="text-3xl font-bold text-white">
-                  {currency === 'USD' ? '$' : '$'}{convertedAmount}
+                  ${convertedAmount}
                 </p>
                 <p className="text-sm text-gray-300">{currency}</p>
               </div>
@@ -114,6 +140,7 @@ export function Exchange({ onNavigate }: ExchangeProps) {
           </div>
         </div>
 
+        {/* Métodos de envío quedan igual, solo UI */}
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
           <h3 className="text-xl font-bold text-white mb-4">Método de envío</h3>
           <div className="space-y-3">
@@ -177,21 +204,6 @@ export function Exchange({ onNavigate }: ExchangeProps) {
               </div>
             </div>
           )}
-
-          {sendMethod === 'worldapp' && (
-            <div className="mt-6 p-5 rounded-xl bg-white/5 border border-white/20 text-center">
-              <Smartphone className="w-12 h-12 text-blue-400 mx-auto mb-3" />
-              <p className="text-gray-300 mb-4">
-                Conectá tu World App para enviar WLD directamente
-              </p>
-              <button
-                type="button"
-                className="px-6 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold hover:shadow-lg transition-all"
-              >
-                Conectar World App
-              </button>
-            </div>
-          )}
         </div>
 
         <button
@@ -216,13 +228,7 @@ export function Exchange({ onNavigate }: ExchangeProps) {
               <div className="flex justify-between text-gray-300">
                 <span>Recibirás:</span>
                 <span className="font-semibold text-white">
-                  {currency === 'USD' ? '$' : '$'}{convertedAmount} {currency}
-                </span>
-              </div>
-              <div className="flex justify-between text-gray-300">
-                <span>Método:</span>
-                <span className="font-semibold text-white">
-                  {sendMethod === 'manual' ? 'Envío Manual' : 'World App'}
+                  ${convertedAmount} {currency}
                 </span>
               </div>
             </div>

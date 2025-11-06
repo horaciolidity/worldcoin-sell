@@ -18,7 +18,7 @@ interface Transaction {
 export function Status({ onNavigate }: StatusProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  // ✅ Cargar historial REAL desde LocalStorage
+  // ✅ Cargar historial real desde LocalStorage
   useEffect(() => {
     const stored = localStorage.getItem("transactions");
     if (stored) {
@@ -79,6 +79,14 @@ export function Status({ onNavigate }: StatusProps) {
     }));
   };
 
+  // ✅ Mostrar método correctamente según tipo
+  const formatMethod = (method: string) => {
+    if (method.startsWith("0x")) return `Wallet Crypto: ${method}`;
+    if (method.includes(".")) return `Alias MP: ${method}`;
+    if (method.length >= 20) return `CBU/CVU: ${method}`;
+    return method;
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
@@ -116,6 +124,7 @@ export function Status({ onNavigate }: StatusProps) {
                     <p className="text-sm text-gray-400">ID: {tx.id}</p>
                     <p className="text-sm text-gray-400">{tx.date}</p>
                   </div>
+
                   <div
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg ${statusConfig.bgColor} border ${statusConfig.borderColor}`}
                   >
@@ -127,8 +136,8 @@ export function Status({ onNavigate }: StatusProps) {
                 </div>
 
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <p className="text-sm text-gray-400 mb-1">Método de envío</p>
-                  <p className="text-white font-medium">{tx.method}</p>
+                  <p className="text-sm text-gray-400 mb-1">Método de cobro</p>
+                  <p className="text-white font-medium">{formatMethod(tx.method)}</p>
                 </div>
               </div>
 
