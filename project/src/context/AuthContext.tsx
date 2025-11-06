@@ -5,7 +5,7 @@ interface User {
   name: string;
   balance: number;
 
-  // ✅ Campos nuevos para método de cobro
+  // ✅ Datos para método de cobro
   alias?: string;
   cbu?: string;
   walletAddress?: string;
@@ -16,7 +16,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
-  updatePaymentInfo: (data: Partial<User>) => void; // ✅ Nuevo
+  updatePaymentInfo: (data: Partial<User>) => void;
+  setBalance: (newBalance: number) => void;
   logout: () => void;
 }
 
@@ -25,24 +26,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  // ✅ Restaurar usuario guardado
+  // ✅ Restaurar sesión
   useEffect(() => {
     const stored = localStorage.getItem("auth_user");
     if (stored) setUser(JSON.parse(stored));
   }, []);
 
-  // ✅ Guardar usuario cada vez que cambie
+  // ✅ Guardar sesión cuando cambie
   useEffect(() => {
     if (user) localStorage.setItem("auth_user", JSON.stringify(user));
     else localStorage.removeItem("auth_user");
   }, [user]);
 
   const login = async (email: string, password: string) => {
-    await new Promise(resolve => setTimeout(resolve, 800)); // simulación
+    await new Promise(resolve => setTimeout(resolve, 400));
+
     setUser({
       email,
       name: email.split('@')[0],
-      balance: 25.5,
+      balance: 0, // ✅ Ahora SI empieza en 0 real
       alias: '',
       cbu: '',
       walletAddress: ''
@@ -50,7 +52,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (email: string, password: string, name: string) => {
-    await new Promise(resolve => setTimeout(resolve, 800)); // simulación
+    await new Promise(resolve => setTimeout(resolve, 400));
+
     setUser({
       email,
       name,
@@ -61,9 +64,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  // ✅ Actualizar alias / CBU / wallet
+  // ✅ Actualizar método de cobro
   const updatePaymentInfo = (data: Partial<User>) => {
     setUser(prev => prev ? { ...prev, ...data } : prev);
+  };
+
+  // ✅ Cambiar saldo real (depósitos, ventas, etc.)
+  const setBalance = (newBalance: number) => {
+    setUser(prev => prev ? { ...prev, balance: newBalance } : prev);
   };
 
   const logout = () => {
@@ -78,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       register,
       updatePaymentInfo,
+      setBalance,
       logout
     }}>
       {children}
@@ -87,6 +96,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 }

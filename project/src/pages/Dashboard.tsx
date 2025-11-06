@@ -1,142 +1,186 @@
-import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { Wallet, TrendingUp, RefreshCw, ArrowRight, Settings } from 'lucide-react';
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { ArrowRight, Copy, Check, Wallet, AlertCircle, Settings } from "lucide-react";
+import { useWLDPrice } from "../hooks/useWLDPrice";
 
-interface DashboardProps {
+interface ExchangeProps {
   onNavigate: (page: string) => void;
 }
 
-export function Dashboard({ onNavigate }: DashboardProps) {
+export function Exchange({ onNavigate }: ExchangeProps) {
   const { user } = useAuth();
-  const [exchangeRate, setExchangeRate] = useState(2.45);
-  const [loading, setLoading] = useState(false);
+  const { usd, ars, loading } = useWLDPrice();
 
-  const handleRefreshRate = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setExchangeRate(Number((2.40 + Math.random() * 0.15).toFixed(2)));
-      setLoading(false);
-    }, 1000);
+  const [amount, setAmount] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [currency, setCurrency] = useState<"USD" | "ARS">("USD");
+
+  const walletAddress = "0xc46f4a60b9bac52c1583abeb4f956d5d798a02e8";
+
+  // ✅ Datos del usuario guardados en Auth
+  const selectedMethod =
+    user?.alias || user?.cbu || user?.walletAddress || null;
+
+  // ✅ Conversión real
+  const rate = currency === "USD" ? usd : ars;
+  const convertedAmount =
+    amount && rate ? (Number(amount) * rate).toFixed(2) : "0.00";
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(walletAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const balanceInUSD = user?.balance ? (user.balance * exchangeRate).toFixed(2) : '0.00';
+  // ✅ Guardar transacción en historial real
+  const saveTransaction = () => {
+    const newTx = {
+      id: crypto.randomUUID(),
+      amount: Number(amount),
+      currency,
+      convertedAmount,
+      method: selectedMethod || "Sin método configurado",
+      status: "pending",
+      date: new Date().toLocaleString(),
+    };
+
+    const prev = JSON.parse(localStorage.getItem("transactions") || "[]");
+    prev.unshift(newTx);
+    localStorage.setItem("transactions", JSON.stringify(prev));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedMethod)
+      return alert("Antes de continuar, configurá tu método de cobro.");
+
+    if (Number(amount) > 0 && Number(amount) <= (user?.balance || 0)) {
+      setShowConfirmModal(true);
+    }
+  };
+
+  const handleConfirm = () => {
+    saveTransaction();
+    setShowConfirmModal(false);
+    onNavigate("status");
+  };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          Hola, {user?.name}
-        </h1>
-        <p className="text-gray-300">Bienvenido a tu panel de control</p>
+        <h1 className="text-3xl font-bold text-white mb-2">Intercambiar WLD</h1>
+        <p className="text-gray-300">Convertí tus Worldcoin a dinero real.</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-500/20 to-purple-600/20 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-xl">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/30 flex items-center justify-center">
-                <Wallet className="w-6 h-6 text-blue-300" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-300">Balance Total</p>
-                <p className="text-xs text-gray-400">Worldcoin (WLD)</p>
-              </div>
-            </div>
-          </div>
-          <div className="mb-2">
-            <h2 className="text-5xl font-bold text-white mb-1">
-              {user?.balance?.toFixed(2)}
-            </h2>
-            <p className="text-lg text-gray-300">
-              ≈ ${balanceInUSD} USD
-            </p>
-          </div>
-
-          <button
-            onClick={() => onNavigate('exchange')}
-            className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold shadow-lg hover:shadow-purple-500/50 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
-          >
-            Intercambiar ahora
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-xl">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-green-500/30 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-green-300" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-300">Tasa de Cambio</p>
-                <p className="text-xs text-gray-400">Última actualización</p>
-              </div>
-            </div>
+      {/* ⚠️ Aviso si no tiene método configurado */}
+      {!selectedMethod && (
+        <div className="p-4 mb-6 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start gap-3">
+          <AlertCircle className="w-6 h-6 text-red-400" />
+          <div className="flex-1 text-red-300">
+            <p className="font-semibold mb-1">No tenés configurado un método de cobro.</p>
+            <p className="text-sm">Configurá cómo querés recibir tu dinero.</p>
             <button
-              onClick={handleRefreshRate}
-              disabled={loading}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all disabled:opacity-50"
+              onClick={() => onNavigate("payment-settings")}
+              className="mt-3 px-4 py-2 rounded-lg bg-red-500/20 text-red-200 hover:bg-red-500/30 transition-all flex items-center gap-2"
             >
-              <RefreshCw className={`w-5 h-5 text-white ${loading ? 'animate-spin' : ''}`} />
+              <Settings className="w-4 h-4" /> Configurar método
             </button>
           </div>
+        </div>
+      )}
 
-          <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-300">1 WLD</span>
-                <span className="text-2xl font-bold text-white">${exchangeRate} USD</span>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-300">1 WLD</span>
-                <span className="text-2xl font-bold text-white">${(exchangeRate * 350).toFixed(2)} ARS</span>
-              </div>
-            </div>
-          </div>
-
-          <p className="mt-4 text-xs text-gray-400 text-center">
-            Las tasas pueden variar según el mercado
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Cantidad */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
+          <label className="block text-sm text-gray-200 mb-2">
+            Cantidad a intercambiar
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            max={user?.balance || 0}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="w-full px-4 py-4 bg-white/5 border border-white/20 rounded-xl text-white text-2xl font-semibold"
+            placeholder="0.00"
+            required
+          />
+          <p className="mt-2 text-sm text-gray-400">
+            Balance disponible: {user?.balance?.toFixed(2)} WLD
           </p>
         </div>
-      </div>
 
-      <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
-        <h3 className="text-xl font-bold text-white mb-6">Acciones Rápidas</h3>
-        <div className="grid md:grid-cols-3 gap-4">
-
-          <button
-            onClick={() => onNavigate('exchange')}
-            className="p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-left group"
-          >
-            <h4 className="font-semibold text-white mb-1">Intercambiar</h4>
-            <p className="text-sm text-gray-400">Convertí tus WLD a dinero</p>
-          </button>
-
-          <button
-            onClick={() => onNavigate('status')}
-            className="p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-left group"
-          >
-            <h4 className="font-semibold text-white mb-1">Ver Estado</h4>
-            <p className="text-sm text-gray-400">Seguí tus transacciones</p>
-          </button>
-
-          {/* ✅ Nuevo botón */}
-          <button
-            onClick={() => onNavigate('payment-settings')}
-            className="p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-left group"
-          >
-            <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Settings className="w-5 h-5 text-orange-300" />
-            </div>
-            <h4 className="font-semibold text-white mb-1">Método de Cobro</h4>
-            <p className="text-sm text-gray-400">Alias / CBU / Wallet</p>
-          </button>
-
+        {/* Moneda */}
+        <div className="grid grid-cols-2 gap-3">
+          {["USD", "ARS"].map((cur) => (
+            <button
+              key={cur}
+              type="button"
+              onClick={() => setCurrency(cur as "USD" | "ARS")}
+              className={`py-3 rounded-xl font-semibold border transition-all ${
+                currency === cur
+                  ? "bg-blue-600 text-white"
+                  : "bg-white/10 text-gray-300 hover:bg-white/20 border-white/20"
+              }`}
+            >
+              {cur}
+            </button>
+          ))}
         </div>
-      </div>
+
+        {/* Resultado */}
+        <div className="p-6 rounded-xl bg-blue-500/20 border border-white/20">
+          <p className="text-gray-300 mb-1">Recibirás aprox:</p>
+          <p className="text-3xl font-bold text-white">
+            {loading ? "Calculando..." : `$${convertedAmount} ${currency}`}
+          </p>
+        </div>
+
+        {/* Dirección de envío */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
+          <h3 className="text-xl font-bold text-white mb-3">Enviar WLD a:</h3>
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-black/30 border border-white/10">
+            <code className="flex-1 text-white text-sm break-all">{walletAddress}</code>
+            <button onClick={handleCopy} className="p-2 rounded-lg bg-white/10 hover:bg-white/20">
+              {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5 text-white" />}
+            </button>
+          </div>
+          <p className="mt-4 text-xs text-gray-400">
+            Las acreditaciones tardan **3 a 15 min**.
+          </p>
+        </div>
+
+        {/* Confirmar */}
+        <button
+          type="submit"
+          disabled={!amount || Number(amount) <= 0}
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white text-lg font-semibold shadow-lg hover:scale-[1.02] transition-all"
+        >
+          Confirmar Intercambio <ArrowRight className="w-5 h-5" />
+        </button>
+      </form>
+
+      {/* Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 p-8 rounded-2xl border border-white/20 max-w-md w-full">
+            <h3 className="text-2xl font-bold text-white mb-4">Confirmar</h3>
+
+            <p className="text-gray-300 mb-6">
+              Después de confirmar, enviá los WLD a la dirección mostrada.
+            </p>
+
+            <button
+              onClick={handleConfirm}
+              className="w-full py-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold"
+            >
+              Continuar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
