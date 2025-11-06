@@ -1,0 +1,107 @@
+import { ArrowRight, Zap, Shield, TrendingUp } from 'lucide-react';
+
+interface HomeProps {
+  onNavigate: (page: string) => void;
+}
+
+export function Home({ onNavigate }: HomeProps) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <nav className="flex justify-between items-center mb-16">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+              <Zap className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-white">WLD Exchange Hub</h1>
+          </div>
+          <button
+            onClick={() => onNavigate('login')}
+            className="px-6 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all"
+          >
+            Iniciar Sesión
+          </button>
+        </nav>
+
+        <div className="text-center mb-16">
+          <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            Intercambiá tus Worldcoin<br />
+            <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+              fácil y rápido
+            </span>
+          </h2>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            La plataforma más segura y confiable para convertir tus WLD en dinero real.
+            Sin complicaciones, con las mejores tasas del mercado.
+          </p>
+          <button
+            onClick={() => onNavigate('login')}
+            className="group px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-lg shadow-2xl hover:shadow-purple-500/50 transition-all transform hover:scale-105 inline-flex items-center gap-2"
+          >
+            Comenzar
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4">
+              <Zap className="w-6 h-6 text-blue-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">Instantáneo</h3>
+            <p className="text-gray-300">
+              Transacciones procesadas en minutos. Sin demoras ni esperas innecesarias.
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center mb-4">
+              <Shield className="w-6 h-6 text-green-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">Seguro</h3>
+            <p className="text-gray-300">
+              Tus fondos están protegidos con las mejores medidas de seguridad del mercado.
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4">
+              <TrendingUp className="w-6 h-6 text-purple-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">Mejor Tasa</h3>
+            <p className="text-gray-300">
+              Ofrecemos las tasas más competitivas del mercado, actualizadas en tiempo real.
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-12 border border-white/20 text-center">
+          <h3 className="text-3xl font-bold text-white mb-4">¿Cómo funciona?</h3>
+          <div className="grid md:grid-cols-3 gap-8 mt-8">
+            <div>
+              <div className="w-12 h-12 rounded-full bg-blue-500 text-white font-bold text-xl flex items-center justify-center mx-auto mb-4">
+                1
+              </div>
+              <h4 className="text-lg font-semibold text-white mb-2">Registrate</h4>
+              <p className="text-gray-300">Creá tu cuenta en segundos</p>
+            </div>
+            <div>
+              <div className="w-12 h-12 rounded-full bg-purple-500 text-white font-bold text-xl flex items-center justify-center mx-auto mb-4">
+                2
+              </div>
+              <h4 className="text-lg font-semibold text-white mb-2">Enviá WLD</h4>
+              <p className="text-gray-300">Transferí tus Worldcoins a nuestra wallet</p>
+            </div>
+            <div>
+              <div className="w-12 h-12 rounded-full bg-green-500 text-white font-bold text-xl flex items-center justify-center mx-auto mb-4">
+                3
+              </div>
+              <h4 className="text-lg font-semibold text-white mb-2">Recibí tu dinero</h4>
+              <p className="text-gray-300">Obtené tu dinero en minutos</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
