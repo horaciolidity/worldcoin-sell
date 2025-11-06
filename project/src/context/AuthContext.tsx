@@ -4,8 +4,8 @@ interface User {
   email: string;
   name: string;
   balance: number;
+  isSubscribed: boolean; // ✅ Nuevo
 
-  // ✅ Datos para método de cobro
   alias?: string;
   cbu?: string;
   walletAddress?: string;
@@ -18,6 +18,7 @@ interface AuthContextType {
   register: (email: string, password: string, name: string) => Promise<void>;
   updatePaymentInfo: (data: Partial<User>) => void;
   setBalance: (newBalance: number) => void;
+  subscribe: () => void; // ✅ Nuevo
   logout: () => void;
 }
 
@@ -26,13 +27,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  // ✅ Restaurar sesión
   useEffect(() => {
     const stored = localStorage.getItem("auth_user");
     if (stored) setUser(JSON.parse(stored));
   }, []);
 
-  // ✅ Guardar sesión cuando cambie
   useEffect(() => {
     if (user) localStorage.setItem("auth_user", JSON.stringify(user));
     else localStorage.removeItem("auth_user");
@@ -40,11 +39,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     await new Promise(resolve => setTimeout(resolve, 400));
-
     setUser({
       email,
       name: email.split('@')[0],
-      balance: 0, // ✅ Ahora SI empieza en 0 real
+      balance: 0,
+      isSubscribed: false, // ✅ Por defecto NO suscripto
       alias: '',
       cbu: '',
       walletAddress: ''
@@ -53,25 +52,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (email: string, password: string, name: string) => {
     await new Promise(resolve => setTimeout(resolve, 400));
-
     setUser({
       email,
       name,
       balance: 0,
+      isSubscribed: false,
       alias: '',
       cbu: '',
       walletAddress: ''
     });
   };
 
-  // ✅ Actualizar método de cobro
   const updatePaymentInfo = (data: Partial<User>) => {
     setUser(prev => prev ? { ...prev, ...data } : prev);
   };
 
-  // ✅ Cambiar saldo real (depósitos, ventas, etc.)
   const setBalance = (newBalance: number) => {
     setUser(prev => prev ? { ...prev, balance: newBalance } : prev);
+  };
+
+  const subscribe = () => {
+    setUser(prev => prev ? { ...prev, isSubscribed: true } : prev);
   };
 
   const logout = () => {
@@ -87,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       updatePaymentInfo,
       setBalance,
+      subscribe,
       logout
     }}>
       {children}
