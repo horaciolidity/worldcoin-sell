@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
-import { Dashboard } from './pages/Dashboard';
+import { Dashboard } from './pages/dashboard_temp';
 import { Exchange } from './pages/Exchange';
 import { Status } from './pages/Status';
 import { PaymentSettings } from './pages/PaymentSettings';
