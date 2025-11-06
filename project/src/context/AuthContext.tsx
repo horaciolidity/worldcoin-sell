@@ -4,8 +4,7 @@ interface User {
   email: string;
   name: string;
   balance: number;
-  isSubscribed: boolean; // ✅ Nuevo
-
+  isSubscribed: boolean; // ✅ NUEVO
   alias?: string;
   cbu?: string;
   walletAddress?: string;
@@ -18,7 +17,7 @@ interface AuthContextType {
   register: (email: string, password: string, name: string) => Promise<void>;
   updatePaymentInfo: (data: Partial<User>) => void;
   setBalance: (newBalance: number) => void;
-  subscribe: () => void; // ✅ Nuevo
+  setSubscription: (state: boolean) => void; // ✅ NUEVO
   logout: () => void;
 }
 
@@ -38,29 +37,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const login = async (email: string, password: string) => {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    setUser({
-      email,
-      name: email.split('@')[0],
-      balance: 0,
-      isSubscribed: false, // ✅ Por defecto NO suscripto
-      alias: '',
-      cbu: '',
-      walletAddress: ''
-    });
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // ⚠️ Si el usuario no está registrado → rechazar login
+    const stored = localStorage.getItem(email);
+    if (!stored) throw new Error("Esta cuenta no está registrada o no está suscripta.");
+
+    const account = JSON.parse(stored);
+
+    // ⚠️ Si no está suscripto → bloquear acceso
+    if (!account.isSubscribed) throw new Error("Tu cuenta no está suscripta. Suscribite para ingresar.");
+
+    setUser(account);
   };
 
   const register = async (email: string, password: string, name: string) => {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    setUser({
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const newUser: User = {
       email,
       name,
       balance: 0,
-      isSubscribed: false,
+      isSubscribed: false, // ✅ Empieza NO suscripto
       alias: '',
       cbu: '',
       walletAddress: ''
-    });
+    };
+
+    // Guardamos la cuenta en localStorage como “registro”
+    localStorage.setItem(email, JSON.stringify(newUser));
+    setUser(newUser);
   };
 
   const updatePaymentInfo = (data: Partial<User>) => {
@@ -71,26 +77,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(prev => prev ? { ...prev, balance: newBalance } : prev);
   };
 
-  const subscribe = () => {
-    setUser(prev => prev ? { ...prev, isSubscribed: true } : prev);
+  const setSubscription = (state: boolean) => {
+    setUser(prev => prev ? { ...prev, isSubscribed: state } : prev);
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("auth_user");
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      isAuthenticated: !!user,
-      login,
-      register,
-      updatePaymentInfo,
-      setBalance,
-      subscribe,
-      logout
-    }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, register, updatePaymentInfo, setBalance, setSubscription, logout }}>
       {children}
     </AuthContext.Provider>
   );
