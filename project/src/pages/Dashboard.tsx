@@ -18,11 +18,11 @@ export function Exchange({ onNavigate }: ExchangeProps) {
 
   const walletAddress = "0xc46f4a60b9bac52c1583abeb4f956d5d798a02e8";
 
-  // ✅ Datos del usuario guardados en Auth
+  // ✅ Método de cobro configurado por el usuario (alias / cbu / wallet)
   const selectedMethod =
     user?.alias || user?.cbu || user?.walletAddress || null;
 
-  // ✅ Conversión real
+  // ✅ Tasa en vivo
   const rate = currency === "USD" ? usd : ars;
   const convertedAmount =
     amount && rate ? (Number(amount) * rate).toFixed(2) : "0.00";
@@ -33,14 +33,14 @@ export function Exchange({ onNavigate }: ExchangeProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // ✅ Guardar transacción en historial real
+  // ✅ Guardar transacción
   const saveTransaction = () => {
     const newTx = {
       id: crypto.randomUUID(),
       amount: Number(amount),
       currency,
       convertedAmount,
-      method: selectedMethod || "Sin método configurado",
+      method: selectedMethod || "No configurado",
       status: "pending",
       date: new Date().toLocaleString(),
     };
@@ -70,16 +70,18 @@ export function Exchange({ onNavigate }: ExchangeProps) {
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Intercambiar WLD</h1>
-        <p className="text-gray-300">Convertí tus Worldcoin a dinero real.</p>
+        <p className="text-gray-300">
+          Convertí tus Worldcoin a dinero real en tu cuenta bancaria o billetera.
+        </p>
       </div>
 
-      {/* ⚠️ Aviso si no tiene método configurado */}
+      {/* ⚠️ Alerta si no tiene método configurado */}
       {!selectedMethod && (
         <div className="p-4 mb-6 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start gap-3">
           <AlertCircle className="w-6 h-6 text-red-400" />
           <div className="flex-1 text-red-300">
-            <p className="font-semibold mb-1">No tenés configurado un método de cobro.</p>
-            <p className="text-sm">Configurá cómo querés recibir tu dinero.</p>
+            <p className="font-semibold mb-1">No tenés método de cobro configurado.</p>
+            <p className="text-sm">Debés indicar cómo querés recibir tu dinero.</p>
             <button
               onClick={() => onNavigate("payment-settings")}
               className="mt-3 px-4 py-2 rounded-lg bg-red-500/20 text-red-200 hover:bg-red-500/30 transition-all flex items-center gap-2"
@@ -112,7 +114,7 @@ export function Exchange({ onNavigate }: ExchangeProps) {
           </p>
         </div>
 
-        {/* Moneda */}
+        {/* Selección moneda */}
         <div className="grid grid-cols-2 gap-3">
           {["USD", "ARS"].map((cur) => (
             <button
@@ -134,11 +136,11 @@ export function Exchange({ onNavigate }: ExchangeProps) {
         <div className="p-6 rounded-xl bg-blue-500/20 border border-white/20">
           <p className="text-gray-300 mb-1">Recibirás aprox:</p>
           <p className="text-3xl font-bold text-white">
-            {loading ? "Calculando..." : `$${convertedAmount} ${currency}`}
+            {loading ? "Actualizando..." : `$${convertedAmount} ${currency}`}
           </p>
         </div>
 
-        {/* Dirección de envío */}
+        {/* Dirección */}
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20">
           <h3 className="text-xl font-bold text-white mb-3">Enviar WLD a:</h3>
           <div className="flex items-center gap-2 p-3 rounded-lg bg-black/30 border border-white/10">
@@ -148,7 +150,7 @@ export function Exchange({ onNavigate }: ExchangeProps) {
             </button>
           </div>
           <p className="mt-4 text-xs text-gray-400">
-            Las acreditaciones tardan **3 a 15 min**.
+            ⚡ Acreditaciones en 3 a 15 minutos.
           </p>
         </div>
 
