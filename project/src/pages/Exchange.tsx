@@ -15,7 +15,7 @@ export function Exchange({ onNavigate }: ExchangeProps) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const exchangeRate = currency === 'USD' ? 2.45 : 857.50;
-  const walletAddress = '0xbaeade80a2a1064e4f8f372cd2ada9a00dab4bbe';
+  const walletAddress = '0xc46f4a60b9bac52c1583abeb4f956d5d798a02e8';
 
   const convertedAmount = amount ? (Number(amount) * exchangeRate).toFixed(2) : '0.00';
 

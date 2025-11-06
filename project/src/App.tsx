@@ -6,8 +6,9 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Exchange } from './pages/Exchange';
 import { Status } from './pages/Status';
+import { PaymentSettings } from './pages/PaymentSettings';
 
-type Page = 'home' | 'login' | 'dashboard' | 'exchange' | 'status';
+type Page = 'home' | 'login' | 'dashboard' | 'exchange' | 'status' | 'payment-settings';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -41,12 +42,18 @@ function AppContent() {
             <Status onNavigate={handleNavigate} />
           </Layout>
         );
+      case 'payment-settings':
+        return (
+          <Layout currentPage="payment-settings" onNavigate={handleNavigate}>
+            <PaymentSettings onNavigate={handleNavigate} />
+          </Layout>
+        );
       default:
         return <Home onNavigate={handleNavigate} />;
     }
   };
 
-  if (!isAuthenticated && (currentPage === 'dashboard' || currentPage === 'exchange' || currentPage === 'status')) {
+  if (!isAuthenticated && (currentPage === 'dashboard' || currentPage === 'exchange' || currentPage === 'status' || currentPage === 'payment-settings')) {
     setCurrentPage('login');
   }
 

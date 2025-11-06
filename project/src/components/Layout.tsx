@@ -1,7 +1,6 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Home, ArrowLeftRight, Clock, LogOut, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { Home, ArrowLeftRight, Clock, LogOut, Menu, X, Settings } from 'lucide-react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -21,12 +20,15 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
     { name: 'Dashboard', icon: Home, page: 'dashboard' },
     { name: 'Intercambiar', icon: ArrowLeftRight, page: 'exchange' },
     { name: 'Estado', icon: Clock, page: 'status' },
+    { name: 'Método de Cobro', icon: Settings, page: 'payment-settings' }, // ✅ AGREGADO
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
       <div className="lg:flex">
-        <aside className={`${menuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white/10 backdrop-blur-xl border-r border-white/20 transition-transform duration-300`}>
+        <aside
+          className={`${menuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white/10 backdrop-blur-xl border-r border-white/20 transition-transform duration-300`}
+        >
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between p-6 border-b border-white/20">
               <h1 className="text-xl font-bold text-white">WLD Exchange</h1>
