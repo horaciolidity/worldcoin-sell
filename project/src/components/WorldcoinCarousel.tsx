@@ -1,7 +1,7 @@
 import { useState } from "react";
-import world1 from "@/assets/world1.jpeg";
-import world2 from "@/assets/world2.jpeg";
-import world3 from "@/assets/world3.jpeg";
+import world1 from "../assets/world1.jpeg";
+import world2 from "../assets/world2.jpeg";
+import world3 from "../assets/world3.jpeg";
 
 const images = [world1, world2, world3];
 
