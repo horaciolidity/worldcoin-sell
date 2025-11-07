@@ -7,6 +7,7 @@ import {
   Check,
   Clock,
   CheckCircle2,
+  Send,
 } from "lucide-react";
 
 interface ExchangeProps {
@@ -32,7 +33,7 @@ export function Exchange({ onNavigate }: ExchangeProps) {
     return isFinite(total) ? total.toFixed(2) : "0.00";
   }, [amount, exchangeRate]);
 
-  const canStep1 = Number(amount) > 0; // ✅ SE PUEDE AVANZAR SIN TENER SALDO
+  const canStep1 = Number(amount) > 0;
   const canStep3 = accepted;
 
   const copyAddress = () => {
@@ -41,14 +42,10 @@ export function Exchange({ onNavigate }: ExchangeProps) {
     setTimeout(() => setCopied(false), 1400);
   };
 
-  // ✅ Guardar transacción con método de cobro
   const confirmSwap = () => {
     const stored = JSON.parse(localStorage.getItem("paymentMethods") || "{}");
     const method =
-      stored.alias ||
-      stored.cbu ||
-      stored.wallet ||
-      "Sin método configurado";
+      stored.alias || stored.cbu || stored.wallet || "Sin método configurado";
 
     const prev = JSON.parse(localStorage.getItem("transactions") || "[]");
 
@@ -57,7 +54,7 @@ export function Exchange({ onNavigate }: ExchangeProps) {
       amount: Number(amount),
       currency,
       received: convertedAmount,
-      method, // ✅ AHORA SÍ SE GUARDA
+      method,
       status: "pending",
       date: new Date().toLocaleString(),
     });
@@ -67,9 +64,9 @@ export function Exchange({ onNavigate }: ExchangeProps) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto pb-12">
 
-      {/* Barra de progreso */}
+      {/* Progreso */}
       <div className="flex justify-between mb-10 text-sm text-gray-300">
         {["Monto", "Moneda", "Enviar", "Confirmar"].map((label, i) => (
           <div
@@ -112,7 +109,9 @@ export function Exchange({ onNavigate }: ExchangeProps) {
       {/* PASO 2 */}
       {step === 2 && (
         <div className="bg-white/5 p-8 rounded-2xl border border-white/20">
-          <h2 className="text-xl text-white font-semibold mb-6">Vas a recibir en:</h2>
+          <h2 className="text-xl text-white font-semibold mb-6">
+            Vas a recibir en:
+          </h2>
 
           <div className="grid grid-cols-2 gap-4">
             {["USD", "ARS"].map((cur) => (
@@ -159,9 +158,18 @@ export function Exchange({ onNavigate }: ExchangeProps) {
           </h2>
 
           <div className="p-4 bg-black/30 border border-white/10 rounded-xl flex items-center gap-3">
-            <code className="text-white text-sm break-all flex-1">{WALLET_ADDRESS}</code>
-            <button onClick={copyAddress} className="p-2 bg-white/10 rounded-lg hover:bg-white/20">
-              {copied ? <Check className="text-green-300" /> : <Copy className="text-white" />}
+            <code className="text-white text-sm break-all flex-1">
+              {WALLET_ADDRESS}
+            </code>
+            <button
+              onClick={copyAddress}
+              className="p-2 bg-white/10 rounded-lg hover:bg-white/20"
+            >
+              {copied ? (
+                <Check className="text-green-300" />
+              ) : (
+                <Copy className="text-white" />
+              )}
             </button>
           </div>
 
@@ -172,7 +180,11 @@ export function Exchange({ onNavigate }: ExchangeProps) {
           </div>
 
           <label className="flex items-start gap-3 mt-6 text-gray-300 text-sm">
-            <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={accepted}
+              onChange={(e) => setAccepted(e.target.checked)}
+            />
             Confirmo que enviaré EXACTAMENTE la cantidad indicada.
           </label>
 
@@ -203,6 +215,20 @@ export function Exchange({ onNavigate }: ExchangeProps) {
           </button>
         </div>
       )}
+
+      {/* 🔹 SOPORTE TELEGRAM */}
+      <div className="mt-10 text-center">
+        <p className="text-gray-300 mb-2">¿Necesitás ayuda?</p>
+        <a
+          href="https://t.me/worlcoin_chile"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold shadow-lg hover:shadow-sky-400/30 transition-all"
+        >
+          <Send className="w-5 h-5" />
+          Soporte en Telegram
+        </a>
+      </div>
     </div>
   );
 }
