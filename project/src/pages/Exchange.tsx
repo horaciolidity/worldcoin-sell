@@ -56,7 +56,7 @@ export function Exchange({ onNavigate }: ExchangeProps) {
       id: crypto.randomUUID(),
       amount: Number(amount),
       currency,
-      convertedAmount,
+      received: convertedAmount,
       method, // ✅ AHORA SÍ SE GUARDA
       status: "pending",
       date: new Date().toLocaleString(),
