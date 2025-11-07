@@ -1,6 +1,7 @@
 import { ArrowRight, Zap, Shield, TrendingUp } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useWLDPrice } from '../hooks/useWLDPrice';
+import WorldcoinCarousel from '../components/WorldcoinCarousel';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
@@ -8,7 +9,7 @@ interface HomeProps {
 
 export function Home({ onNavigate }: HomeProps) {
   const { isAuthenticated } = useAuth();
-  const { usd, ars, loading } = useWLDPrice(); // ✅ Ahora usamos cotización real
+  const { usd, ars, loading } = useWLDPrice(); // ✅ Cotización en tiempo real
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
@@ -70,6 +71,9 @@ export function Home({ onNavigate }: HomeProps) {
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
+
+        {/* ✅ Carrusel de imágenes de Worldcoin */}
+        <WorldcoinCarousel />
 
         {/* FEATURES */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
