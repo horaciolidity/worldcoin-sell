@@ -1,14 +1,13 @@
-import { useState, useMemo } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useWLDPrice } from '../hooks/useWLDPrice';
+import { useState, useMemo } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useWLDPrice } from "../hooks/useWLDPrice";
 import {
   ArrowRight,
   Copy,
   Check,
-  Shield,
   Clock,
-  CheckCircle2
-} from 'lucide-react';
+  CheckCircle2,
+} from "lucide-react";
 
 interface ExchangeProps {
   onNavigate: (page: string) => void;
@@ -16,44 +15,25 @@ interface ExchangeProps {
 
 export function Exchange({ onNavigate }: ExchangeProps) {
   const { user } = useAuth();
-
-  // Precios en tiempo real 🔥
   const { usd, ars, loading } = useWLDPrice();
 
-  // Estado de pasos
+  const WALLET_ADDRESS = "0xc46f4a60b9bac52c1583abeb4f956d5d798a02e8";
+
   const [step, setStep] = useState(1);
-  const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState<'USD' | 'ARS'>('USD');
+  const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState<"USD" | "ARS">("USD");
   const [copied, setCopied] = useState(false);
   const [accepted, setAccepted] = useState(false);
 
-  const WALLET_ADDRESS = '0xc46f4a60b9bac52c1583abeb4f956d5d798a02e8';
-
-  const exchangeRate = currency === 'USD' ? (usd || 0) : (ars || 0);
+  const exchangeRate = currency === "USD" ? (usd || 0) : (ars || 0);
 
   const convertedAmount = useMemo(() => {
     const total = Number(amount || 0) * exchangeRate;
-    return isFinite(total) ? total.toFixed(2) : '0.00';
+    return isFinite(total) ? total.toFixed(2) : "0.00";
   }, [amount, exchangeRate]);
 
-  // ✅ Paso 1 ahora NO depende del balance
-  const canStep1 = Number(amount) > 0;
+  const canStep1 = Number(amount) > 0; // ✅ SE PUEDE AVANZAR SIN TENER SALDO
   const canStep3 = accepted;
-
-  // Guardar transacción
-  const confirmSwap = () => {
-    const prev = JSON.parse(localStorage.getItem('transactions') || '[]');
-    prev.unshift({
-      id: crypto.randomUUID(),
-      amount: Number(amount),
-      currency,
-      received: convertedAmount,
-      status: 'pending',
-      date: new Date().toLocaleString(),
-    });
-    localStorage.setItem('transactions', JSON.stringify(prev));
-    onNavigate('status');
-  };
 
   const copyAddress = () => {
     navigator.clipboard.writeText(WALLET_ADDRESS);
@@ -61,16 +41,41 @@ export function Exchange({ onNavigate }: ExchangeProps) {
     setTimeout(() => setCopied(false), 1400);
   };
 
+  // ✅ Guardar transacción con método de cobro
+  const confirmSwap = () => {
+    const stored = JSON.parse(localStorage.getItem("paymentMethods") || "{}");
+    const method =
+      stored.alias ||
+      stored.cbu ||
+      stored.wallet ||
+      "Sin método configurado";
+
+    const prev = JSON.parse(localStorage.getItem("transactions") || "[]");
+
+    prev.unshift({
+      id: crypto.randomUUID(),
+      amount: Number(amount),
+      currency,
+      convertedAmount,
+      method, // ✅ AHORA SÍ SE GUARDA
+      status: "pending",
+      date: new Date().toLocaleString(),
+    });
+
+    localStorage.setItem("transactions", JSON.stringify(prev));
+    onNavigate("status");
+  };
+
   return (
     <div className="max-w-3xl mx-auto">
 
       {/* Barra de progreso */}
       <div className="flex justify-between mb-10 text-sm text-gray-300">
-        {['Monto', 'Moneda', 'Enviar', 'Confirmar'].map((label, i) => (
+        {["Monto", "Moneda", "Enviar", "Confirmar"].map((label, i) => (
           <div
             key={i}
             className={`flex-1 text-center pb-2 border-b-2 ${
-              step === i + 1 ? 'border-purple-400 text-white' : 'border-white/20'
+              step === i + 1 ? "border-purple-400 text-white" : "border-white/20"
             }`}
           >
             {label}
@@ -81,7 +86,9 @@ export function Exchange({ onNavigate }: ExchangeProps) {
       {/* PASO 1 */}
       {step === 1 && (
         <div className="bg-white/5 p-8 rounded-2xl border border-white/20">
-          <h2 className="text-xl text-white font-semibold mb-4">¿Cuántos WLD querés vender?</h2>
+          <h2 className="text-xl text-white font-semibold mb-4">
+            ¿Cuántos WLD querés vender?
+          </h2>
 
           <input
             type="number"
@@ -91,10 +98,6 @@ export function Exchange({ onNavigate }: ExchangeProps) {
             className="w-full text-4xl px-4 py-4 bg-white/10 border border-white/30 rounded-xl text-white"
             placeholder="0.0"
           />
-
-          <p className="mt-3 text-gray-300 text-sm">
-            * El saldo se acreditará cuando verifiquemos tu envío de WLD.
-          </p>
 
           <button
             disabled={!canStep1}
@@ -112,14 +115,14 @@ export function Exchange({ onNavigate }: ExchangeProps) {
           <h2 className="text-xl text-white font-semibold mb-6">Vas a recibir en:</h2>
 
           <div className="grid grid-cols-2 gap-4">
-            {['USD', 'ARS'].map((cur) => (
+            {["USD", "ARS"].map((cur) => (
               <button
                 key={cur}
                 onClick={() => setCurrency(cur as any)}
                 className={`py-3 rounded-xl font-semibold border ${
                   currency === cur
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-white/10 text-gray-300 border-white/20'
+                    ? "bg-purple-600 text-white"
+                    : "bg-white/10 text-gray-300 border-white/20"
                 }`}
               >
                 {cur}
@@ -129,9 +132,13 @@ export function Exchange({ onNavigate }: ExchangeProps) {
 
           <div className="mt-6 text-white">
             <p className="text-gray-300">Recibirás aprox:</p>
-            <p className="text-4xl font-bold">${convertedAmount} {currency}</p>
+            <p className="text-4xl font-bold">
+              ${convertedAmount} {currency}
+            </p>
             <p className="text-xs text-gray-400 mt-2">
-              {loading ? 'Actualizando tasa…' : `Tasa: ${exchangeRate.toFixed(2)} ${currency}/WLD`}
+              {loading
+                ? "Actualizando tasa…"
+                : `Tasa: ${exchangeRate.toFixed(2)} ${currency}/WLD`}
             </p>
           </div>
 
@@ -147,7 +154,9 @@ export function Exchange({ onNavigate }: ExchangeProps) {
       {/* PASO 3 */}
       {step === 3 && (
         <div className="bg-white/5 p-8 rounded-2xl border border-white/20">
-          <h2 className="text-xl text-white font-semibold mb-4">Enviá tus WLD a esta dirección</h2>
+          <h2 className="text-xl text-white font-semibold mb-4">
+            Enviá tus WLD a esta dirección
+          </h2>
 
           <div className="p-4 bg-black/30 border border-white/10 rounded-xl flex items-center gap-3">
             <code className="text-white text-sm break-all flex-1">{WALLET_ADDRESS}</code>
@@ -158,7 +167,8 @@ export function Exchange({ onNavigate }: ExchangeProps) {
 
           <div className="flex items-center gap-2 mt-4 text-xs text-gray-300">
             <Clock className="w-4 h-4" />
-            Acreditación estimada: <span className="text-white font-medium ml-1">3–15 minutos</span>
+            Acreditación estimada:
+            <span className="text-white font-medium ml-1">3–15 minutos</span>
           </div>
 
           <label className="flex items-start gap-3 mt-6 text-gray-300 text-sm">
