@@ -1,6 +1,6 @@
 import { ArrowRight, Zap, Shield, TrendingUp } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useState, useEffect } from 'react';
+import { useWLDPrice } from '../hooks/useWLDPrice';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
@@ -8,19 +8,7 @@ interface HomeProps {
 
 export function Home({ onNavigate }: HomeProps) {
   const { isAuthenticated } = useAuth();
-
-  // ✅ Traemos la última tasa guardada en localStorage
-  const [rateUSD, setRateUSD] = useState(2.45);
-  const [rateARS, setRateARS] = useState(rateUSD * 350);
-
-  useEffect(() => {
-    const storedRate = localStorage.getItem("exchangeRate");
-    if (storedRate) {
-      const value = Number(storedRate);
-      setRateUSD(value);
-      setRateARS(value * 350);
-    }
-  }, []);
+  const { usd, ars, loading } = useWLDPrice(); // ✅ Ahora usamos cotización real
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
@@ -63,10 +51,15 @@ export function Home({ onNavigate }: HomeProps) {
 
           {/* ✅ Mostrar tasas reales */}
           <p className="text-xl text-gray-300 mb-4">
-            Tasa actual: <span className="text-white font-semibold">${rateUSD} USD</span> por WLD
+            Tasa actual: <span className="text-white font-semibold">
+              {loading ? "..." : `$${usd} USD`}
+            </span> por WLD
           </p>
+
           <p className="text-lg text-gray-400 mb-8">
-            ≈ <span className="text-white font-semibold">${rateARS.toFixed(2)} ARS</span>
+            ≈ <span className="text-white font-semibold">
+              {loading ? "..." : `$${ars} ARS`}
+            </span>
           </p>
 
           <button
