@@ -36,8 +36,8 @@ export function Exchange({ onNavigate }: ExchangeProps) {
     return isFinite(total) ? total.toFixed(2) : '0.00';
   }, [amount, exchangeRate]);
 
-  // Requisitos para cada paso
-  const canStep1 = Number(amount) > 0 && Number(amount) <= (user?.balance || 0);
+  // ✅ Paso 1 ahora NO depende del balance
+  const canStep1 = Number(amount) > 0;
   const canStep3 = accepted;
 
   // Guardar transacción
@@ -87,14 +87,13 @@ export function Exchange({ onNavigate }: ExchangeProps) {
             type="number"
             value={amount}
             min={0}
-            max={user?.balance ?? 0}
             onChange={(e) => setAmount(e.target.value)}
             className="w-full text-4xl px-4 py-4 bg-white/10 border border-white/30 rounded-xl text-white"
             placeholder="0.0"
           />
 
           <p className="mt-3 text-gray-300 text-sm">
-            Balance disponible: {user?.balance?.toFixed(2)} WLD
+            * El saldo se acreditará cuando verifiquemos tu envío de WLD.
           </p>
 
           <button
